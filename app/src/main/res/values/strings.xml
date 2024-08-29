@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">Names App</string>
-    <string name="name_form_title">Enter your name</string>
+    <string name="name_form_title">Enter name</string>
     <string name="name_form_hint">Name</string>
     <string name="name_added">Name added</string>
     <string name="name_button">Add Name</string>
+    <string name="options">Options</string>
+    <string name="favorite">Favorite</string>
+    <string name="language_hr">Hrvatski</string>
+    <string name="language_en">English</string>
 </resources>

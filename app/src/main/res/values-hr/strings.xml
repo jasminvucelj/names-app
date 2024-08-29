@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="app_name">Names App</string>
+    <string name="name_form_title">Unesi ime</string>
+    <string name="name_form_hint">Ime</string>
+    <string name="name_added">Ime dodano</string>
+    <string name="name_button">Dodaj ime</string>
+</resources>

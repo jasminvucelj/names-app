@@ -1,5 +1,6 @@
 package com.jazz.namesapp.ui
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,22 +37,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.os.LocaleListCompat
 import com.jazz.namesapp.R
 import com.jazz.namesapp.data.Name
 import com.jazz.namesapp.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun MyScreen(viewModel: MainViewModel) {
+fun MainScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var showMenu by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     val namesList by viewModel.names.collectAsState(emptyList())
 
@@ -60,6 +65,37 @@ fun MyScreen(viewModel: MainViewModel) {
                         stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.h3
                     )
+                },
+                actions = {
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(Icons.Default.MoreVert, stringResource(R.string.options))
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier.background(MaterialTheme.colors.background)
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("en")
+                                )
+                                showMenu = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.language_en))
+                        }
+                        DropdownMenuItem(
+                            onClick = {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("hr")
+                                )
+                                showMenu = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.language_hr))
+                        }
+                    }
                 }
             )
         },
@@ -133,7 +169,8 @@ private fun MainScreenContent(
         ) {
             items(namesList.size) { index ->
                 Card(
-                    backgroundColor = MaterialTheme.colors.surface, modifier = Modifier.fillMaxWidth()
+                    backgroundColor = MaterialTheme.colors.surface,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
@@ -150,7 +187,7 @@ private fun MainScreenContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Close,
-                                contentDescription = "Favorite",
+                                contentDescription = stringResource(R.string.favorite),
                                 tint = MaterialTheme.colors.error
                             )
                         }
