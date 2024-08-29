@@ -1,5 +1,6 @@
 package com.jazz.namesapp.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
@@ -35,8 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jazz.namesapp.R
+import com.jazz.namesapp.data.Name
+import com.jazz.namesapp.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,7 +49,6 @@ fun MyScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
     var name by remember { mutableStateOf("") }
     val namesList by viewModel.names.collectAsState(emptyList())
 
@@ -63,76 +67,116 @@ fun MyScreen(viewModel: MainViewModel) {
             SnackbarHost(hostState = snackbarHostState)
         },
         content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.name_form_title),
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.h4,
-                    textAlign = TextAlign.Left
-                )
-                TextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.name_form_hint)) },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Button(
-                    onClick = {
-                        if (name.isNotBlank()) {
-                            viewModel.addName(name)
-                            name = ""
-                            scope.launch {
-                                snackbarHostState.showSnackbar(context.getString(R.string.name_added))
-                            }
+            MainScreenContent(
+                name = name,
+                namesList = namesList,
+                onTextFieldValueChange = { name = it },
+                onClickAddName = {
+                    if (name.isNotBlank()) {
+                        viewModel.addName(name)
+                        name = ""
+                        scope.launch {
+                            snackbarHostState.showSnackbar(context.getString(R.string.name_added))
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
+                    }
+                },
+                onClickDelete = { index ->
+                    viewModel.deleteName(namesList[index])
+                },
+                modifier = Modifier.padding(padding)
+            )
+        }
+    )
+}
+
+@Composable
+private fun MainScreenContent(
+    name: String,
+    namesList: List<Name>,
+    onTextFieldValueChange: (String) -> Unit,
+    onClickAddName: () -> Unit,
+    onClickDelete: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.name_form_title),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.h4,
+            textAlign = TextAlign.Left
+        )
+        TextField(
+            value = name,
+            onValueChange = onTextFieldValueChange,
+            label = { Text(stringResource(R.string.name_form_hint)) },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = onClickAddName,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.name_button))
+        }
+        if (namesList.isNotEmpty()) {
+            Divider(thickness = 1.dp)
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(namesList.size) { index ->
+                Card(
+                    backgroundColor = MaterialTheme.colors.surface, modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.name_button))
-                }
-                if (namesList.isNotEmpty()) {
-                    Divider(thickness = 1.dp)
-                }
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(namesList.size) { index ->
-                        Card(
-                            backgroundColor = Color.LightGray, modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = namesList[index].name,
+                            style = MaterialTheme.typography.body1
+                        )
+                        IconButton(
+                            onClick = { onClickDelete(index) },
+                            modifier = Modifier.size(16.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = namesList[index].name,
-                                    style = MaterialTheme.typography.body1
-                                )
-                                IconButton(
-                                    onClick = {
-                                        viewModel.deleteName(namesList[index])
-                                    },
-                                    modifier = Modifier.size(16.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = "Favorite",
-                                        tint = MaterialTheme.colors.error
-                                    )
-                                }
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Favorite",
+                                tint = MaterialTheme.colors.error
+                            )
                         }
                     }
                 }
             }
-        })
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun MainScreenPreview() {
+    AppTheme(darkTheme = false) {
+        Surface {
+            MainScreenContent(
+                name = "Jasmin",
+                namesList = listOf(
+                    Name(name = "Ivan"),
+                    Name(name = "Luka"),
+                    Name(name = "Mladen")
+                ),
+                onTextFieldValueChange = {},
+                onClickAddName = {},
+                onClickDelete = {}
+            )
+        }
+    }
 }
