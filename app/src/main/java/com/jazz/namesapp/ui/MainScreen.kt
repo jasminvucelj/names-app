@@ -1,6 +1,5 @@
 package com.jazz.namesapp.ui
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -24,10 +21,8 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.os.LocaleListCompat
 import com.jazz.namesapp.R
 import com.jazz.namesapp.data.Name
 import com.jazz.namesapp.ui.theme.AppTheme
@@ -51,53 +45,16 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
+
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var showMenu by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
+
     val namesList by viewModel.names.collectAsState(emptyList())
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(id = R.string.app_name),
-                        style = MaterialTheme.typography.h3
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(Icons.Default.MoreVert, stringResource(R.string.options))
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false },
-                        modifier = Modifier.background(MaterialTheme.colors.background)
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("en")
-                                )
-                                showMenu = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.language_en))
-                        }
-                        DropdownMenuItem(
-                            onClick = {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("hr")
-                                )
-                                showMenu = false
-                            }
-                        ) {
-                            Text(stringResource(R.string.language_hr))
-                        }
-                    }
-                }
-            )
+            NamesAppBar()
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
